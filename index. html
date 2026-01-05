@@ -377,6 +377,121 @@ textarea:focus {
   color: var(--gray);
 }
 
+/* FAQ Section Styles */
+.faq-section {
+  background: var(--card-bg);
+  backdrop-filter: blur(15px);
+  border-radius: 24px;
+  padding: 50px 40px;
+  margin: 60px auto;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  max-width: 1000px;
+}
+
+.faq-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.faq-header h2 {
+  font-size: 2.2rem;
+  margin-bottom: 10px;
+  color: var(--light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+.faq-header p {
+  color: var(--gray);
+  font-size: 1.1rem;
+  max-width: 700px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.faq-container {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.faq-category h3 {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--border);
+  color: var(--light);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.faq-item {
+  margin-bottom: 15px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.faq-question {
+  width: 100%;
+  padding: 20px 25px;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--light);
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.3s;
+}
+
+.faq-question:hover {
+  background-color: rgba(124, 58, 237, 0.1);
+}
+
+.faq-question i {
+  transition: transform 0.4s ease;
+}
+
+.faq-question.active i {
+  transform: rotate(180deg);
+}
+
+.faq-answer {
+  padding: 0 25px;
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.4s ease-out;
+  color: var(--gray);
+  line-height: 1.7;
+}
+
+.faq-answer.open {
+  padding: 0 25px 25px 25px;
+  max-height: 1000px;
+}
+
+.faq-answer p {
+  margin-bottom: 15px;
+}
+
+.faq-answer ul {
+  margin-left: 20px;
+  margin-bottom: 15px;
+}
+
+.faq-answer li {
+  margin-bottom: 8px;
+}
+
 /* Footer */
 .footer {
   text-align: center;
@@ -493,20 +608,6 @@ textarea:focus {
   color: var(--gray);
 }
 
-/* Empty State */
-.empty-state {
-  width: 100%;
-  text-align: center;
-  padding: 40px 20px;
-  color: var(--gray);
-}
-
-.empty-state i {
-  font-size: 3rem;
-  margin-bottom: 15px;
-  opacity: 0.5;
-}
-
 /* Responsive */
 @media (max-width: 768px) {
   .tool-card {
@@ -530,8 +631,65 @@ textarea:focus {
   .toast.show {
     transform: translateY(0);
   }
+  
+  .faq-section {
+    padding: 30px 25px;
+  }
+  
+  .faq-header h2 {
+    font-size: 1.8rem;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .faq-question {
+    font-size: 1rem;
+    padding: 18px 20px;
+  }
 }
 </style>
+
+<!-- FAQ Schema Markup for SEO -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is the difference between the Free and AI Hashtag Generators?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Our Free Hashtag Generator is a fast, offline tool that creates hashtags from keywords. The AI Hashtag Generator analyzes your full caption to suggest trending, niche-specific hashtags for maximum reach."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do I need to create an account or pay to use these tools?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Both tools on HashFlow Pro are completely free with no account required, no hidden fees, and no usage limits."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many hashtags should I use on social media posts?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Instagram: 8-15 relevant hashtags. Twitter/X: 1-3. Facebook: 3-5. TikTok: 3-5. Focus on quality and relevance over quantity."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is my data safe? Do you store my captions or keywords?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, your privacy is protected. All processing happens locally in your browser. We do not send or store your keywords, captions, or generated hashtags on any server."
+      }
+    }
+  ]
+}
+</script>
 </head>
 <body>
 
@@ -632,6 +790,88 @@ textarea:focus {
       </div>
     </div>
   </div>
+
+  <!-- SEO FAQ Section -->
+  <section class="faq-section">
+    <div class="faq-header">
+      <h2><i class="fas fa-question-circle"></i> Frequently Asked Questions</h2>
+      <p>Find quick answers to common questions about our hashtag tools. Learn how to use them effectively and understand their benefits.</p>
+    </div>
+
+    <div class="faq-container">
+      <!-- Category: About the Tools -->
+      <div class="faq-category">
+        <h3><i class="fas fa-tools"></i> About Our Hashtag Tools</h3>
+        <div class="faq-item">
+          <button class="faq-question">What is the difference between the Free and AI Hashtag Generators? <i class="fas fa-chevron-down"></i></button>
+          <div class="faq-answer">
+            <p>Our <strong>Free Hashtag Generator</strong> is a fast, offline tool that creates hashtags directly from the keywords you provide. It's perfect for quick, basic hashtag lists.</p>
+            <p>The <strong>AI Hashtag Generator</strong> is a smarter tool that analyzes your full caption or topic to suggest trending, niche-specific, and high-engagement hashtags. It's designed to help your content reach a wider, more targeted audience.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">Do I need to create an account or pay to use these tools? <i class="fas fa-chevron-down"></i></button>
+          <div class="faq-answer">
+            <p>No. Both tools on <strong>HashFlow Pro</strong> are completely free to use with no account required. There are no hidden fees or usage limits. We believe in providing accessible tools for all content creators.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category: Usage & Tips -->
+      <div class="faq-category">
+        <h3><i class="fas fa-lightbulb"></i> Usage Tips & Best Practices</h3>
+        <div class="faq-item">
+          <button class="faq-question">How many hashtags should I use on social media posts? <i class="fas fa-chevron-down"></i></button>
+          <div class="faq-answer">
+            <p>The optimal number varies by platform for a balanced strategy:</p>
+            <ul>
+              <li><strong>Instagram:</strong> You can use up to 30, but 8-15 highly relevant hashtags is often most effective.</li>
+              <li><strong>Twitter / X:</strong> 1-3 hashtags is recommended due to character limits.</li>
+              <li><strong>Facebook:</strong> 3-5 hashtags is generally sufficient.</li>
+              <li><strong>TikTok:</strong> 3-5 popular and niche hashtags can help with discoverability.</li>
+            </ul>
+            <p>Focus on <strong>relevance and quality</strong> over quantity. Our AI tool helps you find the right balance.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">What makes a hashtag effective? <i class="fas fa-chevron-down"></i></button>
+          <div class="faq-answer">
+            <p>Effective hashtags are:</p>
+            <ul>
+              <li><strong>Relevant:</strong> Directly related to your content and audience.</li>
+              <li><strong>Specific:</strong> Mix popular, broad hashtags with more niche ones to reach targeted users.</li>
+              <li><strong>Readable:</strong> Use clear phrasing (e.g., <code>#SocialMediaTips</code> not <code>#socialmediatips</code>).</li>
+              <li><strong>Current:</strong> Leverage trending topics when appropriate.</li>
+            </ul>
+            <p>Our tools are designed to help you create hashtags that meet these criteria.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category: Privacy & Value -->
+      <div class="faq-category">
+        <h3><i class="fas fa-shield-alt"></i> Privacy, Data & Value</h3>
+        <div class="faq-item">
+          <button class="faq-question">Is my data safe? Do you store my captions or keywords? <i class="fas fa-chevron-down"></i></button>
+          <div class="faq-answer">
+            <p><strong>Your privacy is important to us.</strong> All processing for both the Free and AI Hashtag Generators happens locally in your web browser. We do not send your keywords, captions, or generated hashtags to any server, and we do not store this data. You can use our tools with complete confidence.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">How can a hashtag generator improve my social media reach? <i class="fas fa-chevron-down"></i></button>
+          <div class="faq-answer">
+            <p>Using the right hashtags acts like a <strong>discovery engine</strong> for your content. They help categorize your posts, making them visible to users who follow or search for those terms. This can lead to:</p>
+            <ul>
+              <li>Increased impressions from non-followers.</li>
+              <li>Higher engagement rates from interested users.</li>
+              <li>Faster growth of a targeted, relevant audience.</li>
+            </ul>
+            <p>Our tools simplify finding those perfect hashtags, saving you time and improving your strategy.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- Footer -->
   <footer class="footer">
@@ -792,7 +1032,7 @@ function generateAIHashtags() {
 }
 
 // ====================
-// COPY HASHTAGS FUNCTION - FIXED
+// COPY HASHTAGS FUNCTION
 // ====================
 function copyHashtags(outputId, toolType) {
   const output = document.getElementById(outputId);
@@ -1003,12 +1243,34 @@ function showToast(title, message, type = 'success') {
 }
 
 // ====================
-// INITIALIZE PAGE
+// FAQ INTERACTIVE FUNCTIONALITY
 // ====================
 document.addEventListener('DOMContentLoaded', function() {
-  // Update stats on load
+  // Initialize page
   updateStats('free');
   updateStats('ai');
+  
+  // FAQ functionality
+  const faqQuestions = document.querySelectorAll('.faq-question');
+  
+  faqQuestions.forEach(question => {
+    question.addEventListener('click', () => {
+      const answer = question.nextElementSibling;
+      const isOpen = answer.classList.contains('open');
+      
+      // Close all other answers
+      document.querySelectorAll('.faq-answer.open').forEach(openAnswer => {
+        if (openAnswer !== answer) {
+          openAnswer.classList.remove('open');
+          openAnswer.previousElementSibling.classList.remove('active');
+        }
+      });
+      
+      // Toggle current answer
+      answer.classList.toggle('open');
+      question.classList.toggle('active');
+    });
+  });
   
   // Add keyboard shortcuts
   document.addEventListener('keydown', function(e) {
@@ -1027,31 +1289,6 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('freeInput').value = '';
       document.getElementById('aiInput').value = '';
     }
-  });
-  
-  // Add example buttons for quick testing
-  const exampleKeywords = [
-    'travel, adventure, photography, nature',
-    'fitness, workout, health, gym',
-    'food, cooking, recipe, delicious',
-    'business, marketing, success, entrepreneur'
-  ];
-  
-  const exampleCaptions = [
-    'Just finished an amazing hike with breathtaking mountain views! Feeling accomplished and connected with nature.',
-    'Delicious homemade pizza night with fresh ingredients from the local market. Nothing beats homemade food!',
-    'Morning workout complete! Feeling energized and ready to tackle the day. Consistency is key to progress.',
-    'Working on my new business project today. Excited about the potential and looking forward to the journey ahead.'
-  ];
-  
-  // Add click handlers to hashtags for adding to input
-  document.querySelectorAll('.hashtag').forEach(tag => {
-    tag.addEventListener('click', function() {
-      const keyword = this.textContent.replace('#', '');
-      const freeInput = document.getElementById('freeInput');
-      freeInput.value = freeInput.value ? freeInput.value + ', ' + keyword : keyword;
-      showToast('Added', `"${keyword}" added to keywords`, 'info');
-    });
   });
 });
 </script>
