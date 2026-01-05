@@ -1,0 +1,1844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HashFlow Pro | Smart Hashtag Generator</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --primary: #7c3aed;
+  --primary-light: #8b5cf6;
+  --secondary: #f59e0b;
+  --accent: #10b981;
+  --dark: #0f172a;
+  --darker: #020617;
+  --light: #f8fafc;
+  --gray: #64748b;
+  --card-bg: rgba(255, 255, 255, 0.05);
+  --border: rgba(255, 255, 255, 0.1);
+  --shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  --glow: 0 0 30px rgba(124, 58, 237, 0.3);
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+  color: var(--light);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+/* Navigation */
+.navbar {
+  background: rgba(15, 23, 42, 0.9);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  padding: 15px 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo-small {
+  font-size: 1.8rem;
+  font-weight: 800;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-decoration: none;
+}
+
+.nav-links {
+  display: flex;
+  gap: 25px;
+  align-items: center;
+}
+
+.nav-link {
+  color: var(--light);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.3s;
+}
+
+.nav-link:hover {
+  background: rgba(124, 58, 237, 0.1);
+  color: var(--primary-light);
+}
+
+.nav-link.active {
+  background: rgba(124, 58, 237, 0.2);
+  color: var(--primary-light);
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+  gap: 4px;
+}
+
+.hamburger span {
+  width: 25px;
+  height: 3px;
+  background: var(--light);
+  border-radius: 2px;
+  transition: 0.3s;
+}
+
+/* Content Sections */
+.content-section {
+  display: none;
+  padding: 40px 20px;
+}
+
+.content-section.active {
+  display: block;
+  animation: fadeIn 0.5s ease;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* Home Page */
+.header {
+  text-align: center;
+  margin-bottom: 60px;
+  padding-top: 40px;
+}
+
+.logo {
+  font-size: 3.8rem;
+  font-weight: 800;
+  margin-bottom: 10px;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+  position: relative;
+}
+
+.logo::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 4px;
+  bottom: -10px;
+  left: 0;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  border-radius: 2px;
+  transform: scaleX(0);
+  animation: expandLine 1s ease 0.5s forwards;
+}
+
+.tagline {
+  font-size: 1.2rem;
+  color: var(--gray);
+  max-width: 700px;
+  margin: 20px auto 0;
+}
+
+/* Tools Container */
+.tools-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 40px;
+  margin-bottom: 60px;
+}
+
+@media (max-width: 1100px) {
+  .tools-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex;
+  }
+  
+  .nav-links {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    right: 0;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(20px);
+    flex-direction: column;
+    padding: 20px;
+    gap: 15px;
+    transform: translateY(-100%);
+    opacity: 0;
+    transition: all 0.3s;
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .nav-links.active {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  
+  .tools-container {
+    gap: 30px;
+  }
+  
+  .logo {
+    font-size: 3rem;
+  }
+}
+
+/* Tool Card */
+.tool-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(15px);
+  border-radius: 24px;
+  padding: 40px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
+}
+
+.tool-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+}
+
+.tool-card:hover {
+  transform: translateY(-10px);
+  box-shadow: var(--shadow), var(--glow);
+}
+
+.tool-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.tool-icon {
+  width: 70px;
+  height: 70px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20px;
+  font-size: 2rem;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  box-shadow: 0 10px 20px rgba(124, 58, 237, 0.3);
+  animation: pulse 2s infinite;
+}
+
+.tool-card:nth-child(2) .tool-icon {
+  background: linear-gradient(135deg, var(--accent), #34d399);
+  animation-delay: 0.5s;
+}
+
+.tool-header h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.tool-subtitle {
+  color: var(--gray);
+  margin-bottom: 30px;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* Input Area */
+.input-area {
+  position: relative;
+  margin-bottom: 25px;
+}
+
+.input-area i {
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  color: var(--gray);
+  font-size: 1.2rem;
+}
+
+textarea {
+  width: 100%;
+  padding: 20px 20px 20px 55px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  font-size: 1rem;
+  color: var(--light);
+  font-family: inherit;
+  resize: vertical;
+  min-height: 150px;
+  transition: all 0.3s;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: rgba(124, 58, 237, 0.05);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+/* Generate Button */
+.generate-btn {
+  width: 100%;
+  padding: 18px;
+  background: linear-gradient(90deg, var(--primary), var(--primary-light));
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 30px;
+  position: relative;
+  overflow: hidden;
+}
+
+.generate-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: 0.5s;
+}
+
+.generate-btn:hover::before {
+  left: 100%;
+}
+
+.generate-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(124, 58, 237, 0.4);
+}
+
+.generate-btn:active {
+  transform: translateY(-1px);
+}
+
+/* Output Area */
+.output-area {
+  margin-top: 10px;
+}
+
+.output-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.output-header h3 {
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.copy-btn {
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border);
+  color: white;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.copy-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.output-box {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  padding: 25px;
+  min-height: 180px;
+  border: 1px solid var(--border);
+  overflow-y: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.hashtag {
+  display: inline-block;
+  background: rgba(124, 58, 237, 0.15);
+  padding: 10px 18px;
+  border-radius: 50px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  user-select: none;
+}
+
+.hashtag:hover {
+  background: rgba(124, 58, 237, 0.3);
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(124, 58, 237, 0.2);
+}
+
+.hashtag:nth-child(2n) {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.hashtag:nth-child(2n):hover {
+  background: rgba(245, 158, 11, 0.3);
+  box-shadow: 0 5px 15px rgba(245, 158, 11, 0.2);
+}
+
+.hashtag:nth-child(3n) {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.hashtag:nth-child(3n):hover {
+  background: rgba(16, 185, 129, 0.3);
+  box-shadow: 0 5px 15px rgba(16, 185, 129, 0.2);
+}
+
+/* Stats */
+.stats {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  font-size: 0.9rem;
+  color: var(--gray);
+}
+
+/* FAQ Section Styles */
+.faq-section {
+  background: var(--card-bg);
+  backdrop-filter: blur(15px);
+  border-radius: 24px;
+  padding: 50px 40px;
+  margin: 60px auto;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  max-width: 1000px;
+}
+
+.faq-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.faq-header h2 {
+  font-size: 2.2rem;
+  margin-bottom: 10px;
+  color: var(--light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+.faq-header p {
+  color: var(--gray);
+  font-size: 1.1rem;
+  max-width: 700px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.faq-container {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.faq-category h3 {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--border);
+  color: var(--light);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.faq-item {
+  margin-bottom: 15px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.faq-question {
+  width: 100%;
+  padding: 20px 25px;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--light);
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.3s;
+}
+
+.faq-question:hover {
+  background-color: rgba(124, 58, 237, 0.1);
+}
+
+.faq-question i {
+  transition: transform 0.4s ease;
+}
+
+.faq-question.active i {
+  transform: rotate(180deg);
+}
+
+.faq-answer {
+  padding: 0 25px;
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.4s ease-out;
+  color: var(--gray);
+  line-height: 1.7;
+}
+
+.faq-answer.open {
+  padding: 0 25px 25px 25px;
+  max-height: 1000px;
+}
+
+.faq-answer p {
+  margin-bottom: 15px;
+}
+
+.faq-answer ul {
+  margin-left: 20px;
+  margin-bottom: 15px;
+}
+
+.faq-answer li {
+  margin-bottom: 8px;
+}
+
+/* Content Pages */
+.page-content {
+  background: var(--card-bg);
+  backdrop-filter: blur(15px);
+  border-radius: 24px;
+  padding: 50px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  margin: 40px auto;
+  max-width: 1000px;
+}
+
+.page-content h1 {
+  font-size: 2.5rem;
+  margin-bottom: 30px;
+  color: var(--light);
+  text-align: center;
+}
+
+.page-content h2 {
+  font-size: 1.8rem;
+  margin: 40px 0 20px;
+  color: var(--light);
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 10px;
+}
+
+.page-content h3 {
+  font-size: 1.4rem;
+  margin: 30px 0 15px;
+  color: var(--light);
+}
+
+.page-content p {
+  margin-bottom: 20px;
+  color: var(--gray);
+  line-height: 1.8;
+}
+
+.page-content ul, .page-content ol {
+  margin-left: 30px;
+  margin-bottom: 20px;
+  color: var(--gray);
+}
+
+.page-content li {
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+
+.page-content a {
+  color: var(--primary-light);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.page-content a:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 600px;
+  margin: 40px auto;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: var(--light);
+}
+
+.form-group input,
+.form-group textarea {
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  color: var(--light);
+  font-size: 1rem;
+  font-family: inherit;
+  transition: all 0.3s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: rgba(124, 58, 237, 0.05);
+}
+
+.form-group textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+
+.submit-btn {
+  padding: 16px 30px;
+  background: linear-gradient(90deg, var(--primary), var(--primary-light));
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 10px;
+}
+
+.submit-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(124, 58, 237, 0.4);
+}
+
+.contact-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+  margin-top: 50px;
+}
+
+.contact-card {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 30px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  text-align: center;
+}
+
+.contact-card i {
+  font-size: 2.5rem;
+  color: var(--primary);
+  margin-bottom: 20px;
+}
+
+.contact-card h3 {
+  margin-bottom: 10px;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  margin-top: 80px;
+  padding: 30px;
+  border-top: 1px solid var(--border);
+  color: var(--gray);
+  font-size: 0.95rem;
+}
+
+.heart {
+  color: #ef4444;
+  animation: heartbeat 1.5s infinite;
+  display: inline-block;
+}
+
+/* Animations */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes expandLine {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 10px 20px rgba(124, 58, 237, 0.3); }
+  50% { transform: scale(1.05); box-shadow: 0 15px 30px rgba(124, 58, 237, 0.4); }
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+/* Loading Animation */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 150px;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  border-top-color: var(--primary);
+  animation: spin 1s ease-in-out infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Toast Notification */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--dark);
+  padding: 18px 25px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  z-index: 1000;
+  transform: translateX(150%);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border-left: 5px solid var(--accent);
+  max-width: 350px;
+}
+
+.toast.show {
+  transform: translateX(0);
+}
+
+.toast i {
+  font-size: 1.5rem;
+  color: var(--accent);
+}
+
+.toast-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.toast-title {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.toast-message {
+  font-size: 0.9rem;
+  color: var(--gray);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tool-card, .page-content {
+    padding: 30px;
+  }
+  
+  .tool-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 1.6rem;
+  }
+  
+  .toast {
+    bottom: 20px;
+    right: 20px;
+    left: 20px;
+    max-width: none;
+    transform: translateY(150%);
+  }
+  
+  .toast.show {
+    transform: translateY(0);
+  }
+  
+  .faq-section, .page-content {
+    padding: 30px 20px;
+  }
+  
+  .faq-header h2, .page-content h1 {
+    font-size: 1.8rem;
+  }
+  
+  .faq-question {
+    font-size: 1rem;
+    padding: 18px 20px;
+  }
+}
+</style>
+
+<!-- FAQ Schema Markup for SEO -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is the difference between the Free and AI Hashtag Generators?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Our Free Hashtag Generator is a fast, offline tool that creates hashtags from keywords. The AI Hashtag Generator analyzes your full caption to suggest trending, niche-specific hashtags for maximum reach."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do I need to create an account or pay to use these tools?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Both tools on HashFlow Pro are completely free with no account required, no hidden fees, and no usage limits."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many hashtags should I use on social media posts?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Instagram: 8-15 relevant hashtags. Twitter/X: 1-3. Facebook: 3-5. TikTok: 3-5. Focus on quality and relevance over quantity."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is my data safe? Do you store my captions or keywords?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, your privacy is protected. All processing happens locally in your browser. We do not send or store your keywords, captions, or generated hashtags on any server."
+      }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="#" class="logo-small" onclick="showPage('home'); return false;">HashFlow Pro</a>
+    <div class="hamburger" id="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    <div class="nav-links" id="navLinks">
+      <a href="#" class="nav-link active" onclick="showPage('home'); return false;">Home</a>
+      <a href="#" class="nav-link" onclick="showPage('about'); return false;">About Us</a>
+      <a href="#" class="nav-link" onclick="showPage('privacy'); return false;">Privacy Policy</a>
+      <a href="#" class="nav-link" onclick="showPage('terms'); return false;">Terms of Service</a>
+      <a href="#" class="nav-link" onclick="showPage('contact'); return false;">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Home Page -->
+<section id="home" class="content-section active">
+  <div class="container">
+    <header class="header">
+      <h1 class="logo">HashFlow Pro</h1>
+      <p class="tagline">Generate powerful hashtags instantly. Boost your social media engagement with our smart tools.</p>
+    </header>
+
+    <!-- Tools Container -->
+    <div class="tools-container">
+      <!-- Free Tool -->
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon">
+            <i class="fas fa-hashtag"></i>
+          </div>
+          <h2>Free Hashtag Generator</h2>
+        </div>
+        <p class="tool-subtitle">Create hashtags from keywords instantly. No limits, no sign-ups, works 100% offline.</p>
+        
+        <div class="input-area">
+          <i class="fas fa-keyboard"></i>
+          <textarea id="freeInput" placeholder="Enter keywords separated by commas... Example: photography, travel, adventure, landscape, nature"></textarea>
+        </div>
+        
+        <button class="generate-btn" onclick="generateFreeHashtags()">
+          <i class="fas fa-bolt"></i>
+          Generate Free Hashtags
+        </button>
+        
+        <div class="output-area">
+          <div class="output-header">
+            <h3><i class="fas fa-hashtag"></i> Generated Hashtags</h3>
+            <button class="copy-btn" onclick="copyHashtags('freeOutput', 'free')">
+              <i class="far fa-copy"></i> Copy All
+            </button>
+          </div>
+          <div class="output-box" id="freeOutput">
+            <span class="hashtag">#HashFlow</span>
+            <span class="hashtag">#SocialMedia</span>
+            <span class="hashtag">#HashtagGenerator</span>
+            <span class="hashtag">#FreeTool</span>
+            <span class="hashtag">#DigitalMarketing</span>
+          </div>
+          <div class="stats">
+            <span id="freeCount">5 hashtags</span>
+            <span id="freeChars">Character count: 87</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Tool -->
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon">
+            <i class="fas fa-robot"></i>
+          </div>
+          <h2>AI Hashtag Generator</h2>
+        </div>
+        <p class="tool-subtitle">Advanced AI analyzes your content to generate trending, niche-specific hashtags for maximum visibility.</p>
+        
+        <div class="input-area">
+          <i class="fas fa-pen-alt"></i>
+          <textarea id="aiInput" placeholder="Describe your post or paste your caption... Example: Just climbed my first mountain! The view was absolutely breathtaking and worth every step. Feeling accomplished!"></textarea>
+        </div>
+        
+        <button class="generate-btn" onclick="generateAIHashtags()">
+          <i class="fas fa-magic"></i>
+          Generate AI Hashtags
+        </button>
+        
+        <div class="output-area">
+          <div class="output-header">
+            <h3><i class="fas fa-brain"></i> AI Generated Hashtags</h3>
+            <button class="copy-btn" onclick="copyHashtags('aiOutput', 'ai')">
+              <i class="far fa-copy"></i> Copy All
+            </button>
+          </div>
+          <div class="output-box" id="aiOutput">
+            <span class="hashtag">#AdventureTime</span>
+            <span class="hashtag">#MountainClimbing</span>
+            <span class="hashtag">#NatureLovers</span>
+            <span class="hashtag">#OutdoorAdventure</span>
+            <span class="hashtag">#Explore</span>
+            <span class="hashtag">#Achievement</span>
+          </div>
+          <div class="stats">
+            <span id="aiCount">6 hashtags</span>
+            <span id="aiChars">Character count: 115</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEO FAQ Section -->
+    <section class="faq-section">
+      <div class="faq-header">
+        <h2><i class="fas fa-question-circle"></i> Frequently Asked Questions</h2>
+        <p>Find quick answers to common questions about our hashtag tools. Learn how to use them effectively and understand their benefits.</p>
+      </div>
+
+      <div class="faq-container">
+        <!-- Category: About the Tools -->
+        <div class="faq-category">
+          <h3><i class="fas fa-tools"></i> About Our Hashtag Tools</h3>
+          <div class="faq-item">
+            <button class="faq-question">What is the difference between the Free and AI Hashtag Generators? <i class="fas fa-chevron-down"></i></button>
+            <div class="faq-answer">
+              <p>Our <strong>Free Hashtag Generator</strong> is a fast, offline tool that creates hashtags directly from the keywords you provide. It's perfect for quick, basic hashtag lists.</p>
+              <p>The <strong>AI Hashtag Generator</strong> is a smarter tool that analyzes your full caption or topic to suggest trending, niche-specific, and high-engagement hashtags. It's designed to help your content reach a wider, more targeted audience.</p>
+            </div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question">Do I need to create an account or pay to use these tools? <i class="fas fa-chevron-down"></i></button>
+            <div class="faq-answer">
+              <p>No. Both tools on <strong>HashFlow Pro</strong> are completely free to use with no account required. There are no hidden fees or usage limits. We believe in providing accessible tools for all content creators.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Category: Usage & Tips -->
+        <div class="faq-category">
+          <h3><i class="fas fa-lightbulb"></i> Usage Tips & Best Practices</h3>
+          <div class="faq-item">
+            <button class="faq-question">How many hashtags should I use on social media posts? <i class="fas fa-chevron-down"></i></button>
+            <div class="faq-answer">
+              <p>The optimal number varies by platform for a balanced strategy:</p>
+              <ul>
+                <li><strong>Instagram:</strong> You can use up to 30, but 8-15 highly relevant hashtags is often most effective.</li>
+                <li><strong>Twitter / X:</strong> 1-3 hashtags is recommended due to character limits.</li>
+                <li><strong>Facebook:</strong> 3-5 hashtags is generally sufficient.</li>
+                <li><strong>TikTok:</strong> 3-5 popular and niche hashtags can help with discoverability.</li>
+              </ul>
+              <p>Focus on <strong>relevance and quality</strong> over quantity. Our AI tool helps you find the right balance.</p>
+            </div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question">What makes a hashtag effective? <i class="fas fa-chevron-down"></i></button>
+            <div class="faq-answer">
+              <p>Effective hashtags are:</p>
+              <ul>
+                <li><strong>Relevant:</strong> Directly related to your content and audience.</li>
+                <li><strong>Specific:</strong> Mix popular, broad hashtags with more niche ones to reach targeted users.</li>
+                <li><strong>Readable:</strong> Use clear phrasing (e.g., <code>#SocialMediaTips</code> not <code>#socialmediatips</code>).</li>
+                <li><strong>Current:</strong> Leverage trending topics when appropriate.</li>
+              </ul>
+              <p>Our tools are designed to help you create hashtags that meet these criteria.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Category: Privacy & Value -->
+        <div class="faq-category">
+          <h3><i class="fas fa-shield-alt"></i> Privacy, Data & Value</h3>
+          <div class="faq-item">
+            <button class="faq-question">Is my data safe? Do you store my captions or keywords? <i class="fas fa-chevron-down"></i></button>
+            <div class="faq-answer">
+              <p><strong>Your privacy is important to us.</strong> All processing for both the Free and AI Hashtag Generators happens locally in your web browser. We do not send your keywords, captions, or generated hashtags to any server, and we do not store this data. You can use our tools with complete confidence.</p>
+            </div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question">How can a hashtag generator improve my social media reach? <i class="fas fa-chevron-down"></i></button>
+            <div class="faq-answer">
+              <p>Using the right hashtags acts like a <strong>discovery engine</strong> for your content. They help categorize your posts, making them visible to users who follow or search for those terms. This can lead to:</p>
+              <ul>
+                <li>Increased impressions from non-followers.</li>
+                <li>Higher engagement rates from interested users.</li>
+                <li>Faster growth of a targeted, relevant audience.</li>
+              </ul>
+              <p>Our tools simplify finding those perfect hashtags, saving you time and improving your strategy.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>© 2023 HashFlow Pro | Crafted with <span class="heart"><i class="fas fa-heart"></i></span> for content creators worldwide</p>
+      <p>All processing happens locally in your browser. Your data never leaves your device.</p>
+    </footer>
+  </div>
+</section>
+
+<!-- About Us Page -->
+<section id="about" class="content-section">
+  <div class="container">
+    <div class="page-content">
+      <h1>About HashFlow Pro</h1>
+      
+      <h2>Our Mission</h2>
+      <p>HashFlow Pro was founded with a simple yet powerful mission: to empower content creators, marketers, and social media enthusiasts with intelligent tools that enhance their online presence. We believe that effective hashtag usage should be accessible to everyone, regardless of technical expertise or budget.</p>
+      
+      <h2>Our Story</h2>
+      <p>Our journey began in 2023 when our founder, a digital marketer, noticed a common challenge among content creators: finding the right hashtags was time-consuming and often ineffective. Many struggled to reach their target audience despite creating excellent content. We decided to solve this problem by creating smart, intuitive tools that simplify hashtag research and optimization.</p>
+      
+      <h2>What Makes Us Different</h2>
+      <ul>
+        <li><strong>Privacy-First Approach:</strong> All processing happens locally in your browser. Your data never leaves your device.</li>
+        <li><strong>100% Free:</strong> No hidden fees, no subscriptions, no account required.</li>
+        <li><strong>Dual Technology:</strong> Choose between quick keyword-based generation or advanced AI-powered analysis.</li>
+        <li><strong>Platform-Specific Optimization:</strong> Our tools understand the unique requirements of each social media platform.</li>
+      </ul>
+      
+      <h2>Our Values</h2>
+      <p>At HashFlow Pro, we're committed to:</p>
+      <ul>
+        <li><strong>Accessibility:</strong> Making powerful tools available to everyone</li>
+        <li><strong>Transparency:</strong> Being clear about how our tools work</li>
+        <li><strong>Innovation:</strong> Continuously improving our technology</li>
+        <li><strong>Community:</strong> Supporting content creators worldwide</li>
+      </ul>
+      
+      <h2>Meet Our Team</h2>
+      <p>We're a small but passionate team of developers, designers, and digital marketers who believe in the power of social media to connect people and ideas. While we may be small, our dedication to creating useful tools is enormous.</p>
+      
+      <h2>Our Commitment to You</h2>
+      <p>We're committed to maintaining HashFlow Pro as a free, accessible resource for the creator community. We believe in building tools that genuinely help people grow their online presence without compromising their privacy or budget.</p>
+      
+      <h2>Contact Us</h2>
+      <p>Have questions, suggestions, or just want to say hello? Visit our <a href="#" onclick="showPage('contact'); return false;">Contact page</a> to get in touch!</p>
+    </div>
+  </div>
+</section>
+
+<!-- Privacy Policy Page -->
+<section id="privacy" class="content-section">
+  <div class="container">
+    <div class="page-content">
+      <h1>Privacy Policy</h1>
+      <p><strong>Last Updated: December 2023</strong></p>
+      
+      <h2>1. Introduction</h2>
+      <p>Welcome to HashFlow Pro. We respect your privacy and are committed to protecting your personal data. This privacy policy will inform you about how we look after your personal data when you visit our website and tell you about your privacy rights and how the law protects you.</p>
+      
+      <h2>2. Important Information</h2>
+      <p><strong>Controller:</strong> HashFlow Pro is the controller and responsible for your personal data.</p>
+      <p><strong>Contact Details:</strong> If you have any questions about this privacy policy or our privacy practices, please contact us through our <a href="#" onclick="showPage('contact'); return false;">Contact page</a>.</p>
+      
+      <h2>3. The Data We Collect About You</h2>
+      <p>We want to be transparent about what data we collect and how we use it:</p>
+      <ul>
+        <li><strong>No Personal Data Collection:</strong> We do not collect any personal identification information (name, email, address, etc.).</li>
+        <li><strong>No Content Storage:</strong> The keywords, captions, and hashtags you enter are processed locally in your browser and are never sent to our servers.</li>
+        <li><strong>Technical Data:</strong> Like most websites, we may collect anonymous technical data including browser type, device type, and general location data for analytics purposes.</li>
+      </ul>
+      
+      <h2>4. How We Use Your Data</h2>
+      <p>We use collected data only for:</p>
+      <ul>
+        <li>Providing and maintaining our service</li>
+        <li>Improving user experience</li>
+        <li>Understanding how our website is used</li>
+        <li>Technical troubleshooting</li>
+      </ul>
+      
+      <h2>5. Data Security</h2>
+      <p>We have implemented appropriate security measures to prevent your data from being accidentally lost, used, or accessed in an unauthorized way. Since all hashtag generation happens locally in your browser, your content never leaves your device.</p>
+      
+      <h2>6. Data Retention</h2>
+      <p>Since we don't store your personal data or the content you enter into our tools, there's nothing to retain. Your data stays on your device and is cleared when you close your browser.</p>
+      
+      <h2>7. Third-Party Services</h2>
+      <p>We use the following third-party services:</p>
+      <ul>
+        <li><strong>Google Fonts:</strong> For typography on our website</li>
+        <li><strong>Font Awesome:</strong> For icons on our website</li>
+        <li><strong>Google AdSense:</strong> For displaying advertisements (when approved)</li>
+      </ul>
+      <p>These services may collect anonymous usage data according to their respective privacy policies.</p>
+      
+      <h2>8. Cookies</h2>
+      <p>We may use cookies to improve your experience on our site. Cookies are small text files stored on your device. You can set your browser to refuse all or some browser cookies, but this may affect website functionality.</p>
+      
+      <h2>9. Your Legal Rights</h2>
+      <p>Under certain circumstances, you have rights under data protection laws in relation to your personal data, including the right to request access, correction, erasure, restriction, transfer, or to object to processing.</p>
+      
+      <h2>10. Changes to This Policy</h2>
+      <p>We may update this privacy policy from time to time. The updated version will be indicated by an updated "Last Updated" date at the top of this page.</p>
+      
+      <h2>11. How to Contact Us</h2>
+      <p>If you have any questions about this privacy policy, please contact us through our <a href="#" onclick="showPage('contact'); return false;">Contact page</a>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Terms of Service Page -->
+<section id="terms" class="content-section">
+  <div class="container">
+    <div class="page-content">
+      <h1>Terms of Service</h1>
+      <p><strong>Last Updated: December 2023</strong></p>
+      
+      <h2>1. Acceptance of Terms</h2>
+      <p>By accessing and using HashFlow Pro ("the Service"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by these terms, please do not use this service.</p>
+      
+      <h2>2. Description of Service</h2>
+      <p>HashFlow Pro provides online tools for generating hashtags for social media content. The Service includes both a free keyword-based hashtag generator and an AI-powered hashtag generator that analyzes content to suggest relevant hashtags.</p>
+      
+      <h2>3. User Responsibilities</h2>
+      <p>As a user of the Service, you agree to:</p>
+      <ul>
+        <li>Use the Service only for lawful purposes</li>
+        <li>Not use the Service to generate hashtags for illegal, harmful, or offensive content</li>
+        <li>Not attempt to disrupt or interfere with the Service</li>
+        <li>Not use automated systems to access the Service excessively</li>
+      </ul>
+      
+      <h2>4. Intellectual Property Rights</h2>
+      <p>All content on HashFlow Pro, including but not limited to text, graphics, logos, and software, is the property of HashFlow Pro and is protected by copyright and intellectual property laws. The hashtags generated by our tools are suggestions for your use and do not constitute our intellectual property.</p>
+      
+      <h2>5. Disclaimer of Warranties</h2>
+      <p>The Service is provided "as is" and "as available" without any warranties of any kind, either express or implied. We do not warrant that:</p>
+      <ul>
+        <li>The Service will meet your specific requirements</li>
+        <li>The Service will be uninterrupted, timely, secure, or error-free</li>
+        <li>The results obtained from using the Service will be accurate or reliable</li>
+        <li>The quality of any products, services, information, or other material obtained through the Service will meet your expectations</li>
+      </ul>
+      
+      <h2>6. Limitation of Liability</h2>
+      <p>In no event shall HashFlow Pro be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from:</p>
+      <ul>
+        <li>Your access to or use of or inability to access or use the Service</li>
+        <li>Any conduct or content of any third party on the Service</li>
+        <li>Any content obtained from the Service</li>
+        <li>Unauthorized access, use, or alteration of your transmissions or content</li>
+      </ul>
+      
+      <h2>7. Modifications to Service</h2>
+      <p>We reserve the right at any time to modify or discontinue, temporarily or permanently, the Service (or any part thereof) with or without notice. We shall not be liable to you or to any third party for any modification, price change, suspension, or discontinuance of the Service.</p>
+      
+      <h2>8. Termination</h2>
+      <p>We may terminate or suspend your access to the Service immediately, without prior notice or liability, for any reason whatsoever, including without limitation if you breach the Terms.</p>
+      
+      <h2>9. Governing Law</h2>
+      <p>These Terms shall be governed and construed in accordance with the laws of the United States, without regard to its conflict of law provisions.</p>
+      
+      <h2>10. Changes to Terms</h2>
+      <p>We reserve the right, at our sole discretion, to modify or replace these Terms at any time. By continuing to access or use our Service after those revisions become effective, you agree to be bound by the revised terms.</p>
+      
+      <h2>11. Contact Us</h2>
+      <p>If you have any questions about these Terms, please contact us through our <a href="#" onclick="showPage('contact'); return false;">Contact page</a>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Contact Page -->
+<section id="contact" class="content-section">
+  <div class="container">
+    <div class="page-content">
+      <h1>Contact Us</h1>
+      <p>We'd love to hear from you! Whether you have questions about our tools, suggestions for improvements, or just want to say hello, please don't hesitate to reach out.</p>
+      
+      <div class="contact-info">
+        <div class="contact-card">
+          <i class="fas fa-envelope"></i>
+          <h3>Email Us</h3>
+          <p>For general inquiries and support</p>
+          <p><strong>contact@hashflowpro.com</strong></p>
+        </div>
+        
+        <div class="contact-card">
+          <i class="fas fa-comments"></i>
+          <h3>Feedback & Suggestions</h3>
+          <p>Help us improve our tools</p>
+          <p>We value your input</p>
+        </div>
+        
+        <div class="contact-card">
+          <i class="fas fa-lightbulb"></i>
+          <h3>Feature Requests</h3>
+          <p>Have an idea for a new feature?</p>
+          <p>Let us know!</p>
+        </div>
+      </div>
+      
+      <h2>Send Us a Message</h2>
+      <form class="contact-form" id="contactForm">
+        <div class="form-group">
+          <label for="name">Your Name</label>
+          <input type="text" id="name" name="name" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="subject">Subject</label>
+          <input type="text" id="subject" name="subject" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="message">Your Message</label>
+          <textarea id="message" name="message" required></textarea>
+        </div>
+        
+        <button type="submit" class="submit-btn">Send Message</button>
+      </form>
+      
+      <h2>Frequently Asked Questions</h2>
+      <p>Before contacting us, you might find answers to common questions on our <a href="#" onclick="showPage('home'); scrollToFAQ(); return false;">FAQ page</a>.</p>
+      
+      <h2>Response Time</h2>
+      <p>We strive to respond to all inquiries within 24-48 hours during business days. Thank you for your patience and for using HashFlow Pro!</p>
+    </div>
+  </div>
+</section>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast">
+  <i class="fas fa-check-circle" id="toastIcon"></i>
+  <div class="toast-content">
+    <div class="toast-title" id="toastTitle">Success!</div>
+    <div class="toast-message" id="toastMessage">Hashtags copied to clipboard</div>
+  </div>
+</div>
+
+<script>
+// ====================
+// NAVIGATION FUNCTIONS
+// ====================
+function showPage(pageId) {
+  // Hide all pages
+  document.querySelectorAll('.content-section').forEach(section => {
+    section.classList.remove('active');
+  });
+  
+  // Show selected page
+  document.getElementById(pageId).classList.add('active');
+  
+  // Update active nav link
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.classList.remove('active');
+  });
+  
+  // Find and activate the corresponding nav link
+  const activeLink = Array.from(document.querySelectorAll('.nav-link')).find(link => 
+    link.getAttribute('onclick')?.includes(`showPage('${pageId}')`)
+  );
+  
+  if (activeLink) {
+    activeLink.classList.add('active');
+  }
+  
+  // Close mobile menu if open
+  const navLinks = document.getElementById('navLinks');
+  navLinks.classList.remove('active');
+  
+  // Scroll to top
+  window.scrollTo(0, 0);
+}
+
+function scrollToFAQ() {
+  // This function would scroll to FAQ on home page
+  // Currently handled by navigation
+}
+
+// ====================
+// MOBILE MENU TOGGLE
+// ====================
+document.getElementById('hamburger').addEventListener('click', function() {
+  const navLinks = document.getElementById('navLinks');
+  navLinks.classList.toggle('active');
+  
+  // Animate hamburger to X
+  const spans = this.querySelectorAll('span');
+  if (navLinks.classList.contains('active')) {
+    spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
+    spans[1].style.opacity = '0';
+    spans[2].style.transform = 'rotate(-45deg) translate(7px, -6px)';
+  } else {
+    spans[0].style.transform = 'none';
+    spans[1].style.opacity = '1';
+    spans[2].style.transform = 'none';
+  }
+});
+
+// ====================
+// CONTACT FORM HANDLING
+// ====================
+document.getElementById('contactForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  
+  // Get form values
+  const name = document.getElementById('name').value;
+  const email = document.getElementById('email').value;
+  const subject = document.getElementById('subject').value;
+  const message = document.getElementById('message').value;
+  
+  // In a real application, you would send this data to a server
+  // For this demo, we'll just show a success message
+  showToast('Message Sent!', 'Thank you for contacting us. We\'ll get back to you soon.', 'success');
+  
+  // Clear form
+  this.reset();
+  
+  // Return to home page after 2 seconds
+  setTimeout(() => {
+    showPage('home');
+  }, 2000);
+});
+
+// ====================
+// FREE HASHTAG GENERATOR
+// ====================
+function generateFreeHashtags() {
+  const input = document.getElementById('freeInput').value.trim();
+  const output = document.getElementById('freeOutput');
+  
+  // Clear previous output
+  output.innerHTML = '';
+  
+  // If no input, show default hashtags
+  if (!input) {
+    const defaultTags = [
+      '#SocialMedia', '#ContentCreation', '#DigitalMarketing', 
+      '#OnlinePresence', '#HashtagStrategy', '#HashFlow', '#FreeTool'
+    ];
+    
+    defaultTags.forEach(tag => {
+      const tagElement = createHashtagElement(tag);
+      output.appendChild(tagElement);
+    });
+    
+    updateStats('free');
+    return;
+  }
+  
+  // Show loading animation
+  output.innerHTML = `
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Generating hashtags...</p>
+    </div>
+  `;
+  
+  // Process after a short delay for better UX
+  setTimeout(() => {
+    // Split input by commas and clean up
+    const keywords = input.split(',')
+      .map(k => k.trim())
+      .filter(k => k.length > 0);
+    
+    let hashtags = [];
+    
+    // Generate hashtags for each keyword
+    keywords.forEach(keyword => {
+      const cleanKeyword = keyword.toLowerCase()
+        .replace(/[^a-z0-9\s]/g, '') // Remove special characters
+        .replace(/\s+/g, ''); // Remove spaces
+      
+      if (cleanKeyword && cleanKeyword.length >= 2) {
+        // Create variations
+        hashtags.push(`#${cleanKeyword}`);
+        hashtags.push(`#${cleanKeyword}2023`);
+        hashtags.push(`#${cleanKeyword}Life`);
+        hashtags.push(`#${cleanKeyword}Love`);
+        hashtags.push(`#Best${capitalizeFirstLetter(cleanKeyword)}`);
+        hashtags.push(`#${cleanKeyword}Goals`);
+        hashtags.push(`#${cleanKeyword}Journey`);
+        hashtags.push(`#${cleanKeyword}Community`);
+      }
+    });
+    
+    // Add some general popular hashtags
+    const popularTags = [
+      '#SocialMedia', '#DigitalMarketing', '#ContentCreator', 
+      '#OnlineBusiness', '#MarketingTips', '#GrowthHacking'
+    ];
+    
+    hashtags = [...hashtags, ...popularTags];
+    
+    // Remove duplicates and limit to 30
+    hashtags = [...new Set(hashtags)].slice(0, 30);
+    
+    // Clear output
+    output.innerHTML = '';
+    
+    // Add hashtags with animation
+    hashtags.forEach((tag, index) => {
+      const tagElement = createHashtagElement(tag);
+      tagElement.style.animationDelay = `${index * 0.05}s`;
+      output.appendChild(tagElement);
+    });
+    
+    updateStats('free');
+  }, 600);
+}
+
+// ====================
+// AI HASHTAG GENERATOR
+// ====================
+function generateAIHashtags() {
+  const input = document.getElementById('aiInput').value.trim();
+  const output = document.getElementById('aiOutput');
+  
+  // Clear previous output
+  output.innerHTML = '';
+  
+  // If no input, show default hashtags
+  if (!input) {
+    const defaultTags = [
+      '#AIHashtags', '#SmartTool', '#ContentOptimization', 
+      '#SocialMediaAI', '#Trending', '#HashFlow', '#AIAssistant'
+    ];
+    
+    defaultTags.forEach(tag => {
+      const tagElement = createHashtagElement(tag);
+      output.appendChild(tagElement);
+    });
+    
+    updateStats('ai');
+    return;
+  }
+  
+  // Show loading animation
+  output.innerHTML = `
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>AI analyzing your content...</p>
+    </div>
+  `;
+  
+  // Process after a short delay for better UX
+  setTimeout(() => {
+    // Analyze the input text
+    const topics = analyzeTextTopics(input);
+    const hashtags = generateSmartHashtags(topics, input);
+    
+    // Clear output
+    output.innerHTML = '';
+    
+    // Add hashtags with animation
+    hashtags.forEach((tag, index) => {
+      const tagElement = createHashtagElement(tag);
+      tagElement.style.animationDelay = `${index * 0.05}s`;
+      output.appendChild(tagElement);
+    });
+    
+    updateStats('ai');
+  }, 800);
+}
+
+// ====================
+// COPY HASHTAGS FUNCTION
+// ====================
+function copyHashtags(outputId, toolType) {
+  const output = document.getElementById(outputId);
+  const hashtagElements = output.querySelectorAll('.hashtag');
+  
+  // Check if there are hashtags to copy
+  if (hashtagElements.length === 0) {
+    showToast('No Hashtags', 'Generate hashtags first!', 'error');
+    return;
+  }
+  
+  // Extract text from hashtag elements
+  const hashtags = Array.from(hashtagElements)
+    .map(el => el.textContent)
+    .join(' ');
+  
+  // Create a temporary textarea element
+  const textarea = document.createElement('textarea');
+  textarea.value = hashtags;
+  textarea.style.position = 'fixed';
+  textarea.style.opacity = '0';
+  document.body.appendChild(textarea);
+  
+  // Select and copy the text
+  textarea.select();
+  textarea.setSelectionRange(0, 99999); // For mobile devices
+  
+  try {
+    const successful = document.execCommand('copy');
+    
+    if (successful) {
+      showToast('Copied!', `${hashtagElements.length} hashtags copied to clipboard`, 'success');
+      
+      // Visual feedback on button
+      const copyBtn = document.querySelector(`[onclick="copyHashtags('${outputId}', '${toolType}')"]`);
+      if (copyBtn) {
+        copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        copyBtn.style.background = 'rgba(16, 185, 129, 0.2)';
+        copyBtn.style.borderColor = '#10b981';
+        
+        setTimeout(() => {
+          copyBtn.innerHTML = '<i class="far fa-copy"></i> Copy All';
+          copyBtn.style.background = '';
+          copyBtn.style.borderColor = '';
+        }, 2000);
+      }
+    } else {
+      showToast('Error', 'Failed to copy hashtags', 'error');
+    }
+  } catch (err) {
+    console.error('Copy failed:', err);
+    showToast('Error', 'Failed to copy hashtags', 'error');
+  }
+  
+  // Clean up
+  document.body.removeChild(textarea);
+}
+
+// ====================
+// HELPER FUNCTIONS
+// ====================
+function createHashtagElement(text) {
+  const span = document.createElement('span');
+  span.className = 'hashtag';
+  span.textContent = text;
+  
+  // Make hashtags clickable to add to input
+  span.addEventListener('click', function() {
+    const keyword = text.replace('#', '');
+    const freeInput = document.getElementById('freeInput');
+    const currentValue = freeInput.value.trim();
+    
+    if (currentValue) {
+      freeInput.value = currentValue + ', ' + keyword;
+    } else {
+      freeInput.value = keyword;
+    }
+    
+    // Visual feedback
+    this.style.transform = 'scale(0.9)';
+    setTimeout(() => {
+      this.style.transform = '';
+    }, 200);
+    
+    showToast('Added', `"${keyword}" added to keywords`, 'info');
+  });
+  
+  return span;
+}
+
+function analyzeTextTopics(text) {
+  const textLower = text.toLowerCase();
+  const topics = [];
+  
+  // Topic detection
+  const topicKeywords = {
+    fitness: ['fitness', 'workout', 'gym', 'exercise', 'health', 'fit', 'training'],
+    food: ['food', 'eat', 'cook', 'recipe', 'meal', 'restaurant', 'delicious'],
+    travel: ['travel', 'trip', 'vacation', 'journey', 'adventure', 'explore'],
+    photography: ['photo', 'photography', 'camera', 'shot', 'picture', 'image'],
+    fashion: ['fashion', 'style', 'outfit', 'clothes', 'wear', 'trend'],
+    technology: ['tech', 'technology', 'digital', 'app', 'software', 'code'],
+    nature: ['nature', 'outdoor', 'park', 'mountain', 'beach', 'sunset', 'hike'],
+    business: ['business', 'entrepreneur', 'startup', 'marketing', 'money', 'success']
+  };
+  
+  for (const [topic, keywords] of Object.entries(topicKeywords)) {
+    if (keywords.some(keyword => textLower.includes(keyword))) {
+      topics.push(topic);
+    }
+  }
+  
+  return topics.length > 0 ? topics : ['general'];
+}
+
+function generateSmartHashtags(topics, text) {
+  let hashtags = [];
+  
+  // Topic-based hashtags
+  topics.forEach(topic => {
+    const topicHashtags = {
+      fitness: ['#Fitness', '#Workout', '#GymLife', '#HealthyLifestyle', '#FitFam', '#Exercise', '#FitnessJourney', '#HealthGoals'],
+      food: ['#Foodie', '#FoodPhotography', '#Delicious', '#HomeCooking', '#Recipe', '#FoodBlogger', '#Yummy', '#EatWell'],
+      travel: ['#Travel', '#Wanderlust', '#Adventure', '#Explore', '#TravelBlogger', '#Vacation', '#TravelDiaries', '#Journey'],
+      photography: ['#Photography', '#PhotoOfTheDay', '#InstaPhoto', '#Camera', '#VisualStorytelling', '#PhotographyLife', '#CreativeEye'],
+      fashion: ['#Fashion', '#OOTD', '#Style', '#FashionBlogger', '#Trendy', '#Lookbook', '#Fashionista', '#StreetStyle'],
+      technology: ['#Tech', '#Innovation', '#Digital', '#FutureTech', '#AI', '#Software', '#AppDevelopment', '#TechNews'],
+      nature: ['#Nature', '#Outdoors', '#NaturePhotography', '#Wilderness', '#ExploreNature', '#NaturalBeauty', '#Earth'],
+      business: ['#Business', '#Entrepreneur', '#Startup', '#Marketing', '#Success', '#Leadership', '#Money', '#Investing'],
+      general: ['#SocialMedia', '#ContentCreator', '#Digital', '#Online', '#Community', '#Inspiration', '#Motivation', '#Life']
+    };
+    
+    if (topicHashtags[topic]) {
+      hashtags.push(...topicHashtags[topic]);
+    }
+  });
+  
+  // Extract keywords from text for additional hashtags
+  const words = text.toLowerCase().split(/\s+/);
+  words.forEach(word => {
+    if (word.length > 4 && word.match(/^[a-z]+$/)) {
+      hashtags.push(`#${capitalizeFirstLetter(word)}`);
+    }
+  });
+  
+  // Add trending and platform-specific hashtags
+  const trendingTags = [
+    '#Trending', '#Viral', '#ExplorePage', '#ForYouPage', '#InstaGood', 
+    '#PhotoOfTheDay', '#Daily', '#Life', '#Motivation', '#Inspiration',
+    '#HashFlow', '#AIAssistant', '#SmartTool'
+  ];
+  
+  hashtags = [...hashtags, ...trendingTags];
+  
+  // Remove duplicates and limit
+  return [...new Set(hashtags)].slice(0, 25);
+}
+
+function updateStats(toolType) {
+  const output = document.getElementById(`${toolType}Output`);
+  const hashtags = output.querySelectorAll('.hashtag');
+  const count = hashtags.length;
+  
+  // Calculate character count
+  let charCount = 0;
+  hashtags.forEach(tag => {
+    charCount += tag.textContent.length + 1; // +1 for space
+  });
+  
+  // Update display
+  document.getElementById(`${toolType}Count`).textContent = `${count} hashtags`;
+  document.getElementById(`${toolType}Chars`).textContent = `Character count: ${charCount}`;
+}
+
+function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function showToast(title, message, type = 'success') {
+  const toast = document.getElementById('toast');
+  const toastIcon = document.getElementById('toastIcon');
+  const toastTitle = document.getElementById('toastTitle');
+  const toastMessage = document.getElementById('toastMessage');
+  
+  // Set content
+  toastTitle.textContent = title;
+  toastMessage.textContent = message;
+  
+  // Set icon based on type
+  if (type === 'success') {
+    toastIcon.className = 'fas fa-check-circle';
+    toast.style.borderLeftColor = '#10b981';
+  } else if (type === 'error') {
+    toastIcon.className = 'fas fa-exclamation-circle';
+    toast.style.borderLeftColor = '#ef4444';
+  } else {
+    toastIcon.className = 'fas fa-info-circle';
+    toast.style.borderLeftColor = '#f59e0b';
+  }
+  
+  // Show toast
+  toast.classList.add('show');
+  
+  // Hide after 3 seconds
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3000);
+}
+
+// ====================
+// FAQ INTERACTIVE FUNCTIONALITY
+// ====================
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize page
+  updateStats('free');
+  updateStats('ai');
+  
+  // FAQ functionality
+  const faqQuestions = document.querySelectorAll('.faq-question');
+  
+  faqQuestions.forEach(question => {
+    question.addEventListener('click', () => {
+      const answer = question.nextElementSibling;
+      const isOpen = answer.classList.contains('open');
+      
+      // Close all other answers
+      document.querySelectorAll('.faq-answer.open').forEach(openAnswer => {
+        if (openAnswer !== answer) {
+          openAnswer.classList.remove('open');
+          openAnswer.previousElementSibling.classList.remove('active');
+        }
+      });
+      
+      // Toggle current answer
+      answer.classList.toggle('open');
+      question.classList.toggle('active');
+    });
+  });
+  
+  // Add keyboard shortcuts
+  document.addEventListener('keydown', function(e) {
+    // Ctrl+Enter in free input
+    if (e.ctrlKey && e.key === 'Enter' && document.activeElement.id === 'freeInput') {
+      generateFreeHashtags();
+    }
+    
+    // Ctrl+Enter in AI input
+    if (e.ctrlKey && e.key === 'Enter' && document.activeElement.id === 'aiInput') {
+      generateAIHashtags();
+    }
+    
+    // Escape to clear inputs
+    if (e.key === 'Escape') {
+      document.getElementById('freeInput').value = '';
+      document.getElementById('aiInput').value = '';
+    }
+  });
+});
+</script>
+</body>
+</html>
