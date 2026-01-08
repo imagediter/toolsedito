@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Background Remover</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,sans-serif}
+body{background:linear-gradient(135deg,#eef2ff,#dbeafe);padding:20px}
+.container{
+max-width:900px;margin:auto;background:#fff;
+padding:25px;border-radius:16px;
+box-shadow:0 10px 30px rgba(0,0,0,.1)
+}
+h1{
+text-align:center;margin-bottom:15px;
+background:linear-gradient(90deg,#4f46e5,#9333ea);
+-webkit-background-clip:text;color:transparent
+}
+.upload{
+border:3px dashed #4f46e5;
+border-radius:16px;padding:35px;
+text-align:center;cursor:pointer
+}
+.upload:hover{background:#f4f6ff}
+.upload i{font-size:3rem;color:#4f46e5}
+.preview{
+display:grid;gap:20px;margin-top:20px
+}
+@media(min-width:700px){.preview{grid-template-columns:1fr 1fr}}
+.box{text-align:center}
+.box img{
+max-width:100%;
+max-height:320px;
+display:none;
+border-radius:12px;
+box-shadow:0 4px 15px rgba(0,0,0,.15)
+}
+button{
+width:100%;margin-top:15px;
+padding:14px;border:none;border-radius:12px;
+font-weight:600;font-size:1rem;
+cursor:pointer;background:#4f46e5;color:#fff
+}
+button:disabled{opacity:.6;cursor:not-allowed}
+.download{background:#16a34a}
+.loader{
+display:none;text-align:center;margin-top:15px;
+color:#4f46e5;font-weight:600
+}
+footer{
+text-align:center;margin-top:20px;
+font-size:.85rem;color:#666
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+<h1><i class="fas fa-magic"></i> AI Background Remover</h1>
+
+<div class="upload" id="upload">
+<i class="fas fa-cloud-upload-alt"></i>
+<p>Click to Upload Image</p>
+<input type="file" id="file" hidden accept="image/*">
+</div>
+
+<div class="preview">
+<div class="box">
+<h3>Original</h3>
+<img id="original">
+</div>
+<div class="box">
+<h3>Result</h3>
+<img id="result">
+</div>
+</div>
+
+<button id="removeBtn" disabled>Remove Background</button>
+<button id="downloadBtn" class="download" disabled>Download Image</button>
+
+<div class="loader" id="loader">
+<i class="fas fa-spinner fa-spin"></i> Removing background…
+</div>
+
+<footer>
+<p>Powered by AI Background Removal</p>
+</footer>
+</div>
+
+<script>
+// =============================
+// CONFIG
+// =============================
+const API_KEY = "b546875c-3f5a-4d43-8d1f-80d93cebadbc";
+const API_URL = "https://api.remove.bg/v1.0/removebg";
+
+// =============================
+// ELEMENTS
+// =============================
+const upload = document.getElementById("upload");
+const fileInput = document.getElementById("file");
+const original = document.getElementById("original");
+const result = document.getElementById("result");
+const removeBtn = document.getElementById("removeBtn");
+const downloadBtn = document.getElementById("downloadBtn");
+const loader = document.getElementById("loader");
+
+let selectedFile = null;
+
+// =============================
+// UPLOAD
+// =============================
+upload.onclick = () => fileInput.click();
+
+fileInput.onchange = e => {
+  selectedFile = e.target.files[0];
+  if (!selectedFile) return;
+
+  original.src = URL.createObjectURL(selectedFile);
+  original.style.display = "block";
+  result.style.display = "none";
+
+  removeBtn.disabled = false;
+  downloadBtn.disabled = true;
+};
+
+// =============================
+// REMOVE BACKGROUND
+// =============================
+removeBtn.onclick = async () => {
+  loader.style.display = "block";
+  removeBtn.disabled = true;
+
+  const formData = new FormData();
+  formData.append("image_file", selectedFile);
+  formData.append("size", "auto");
+
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "X-Api-Key": API_KEY
+      },
+      body: formData
+    });
+
+    if (!response.ok) throw new Error("API Error");
+
+    const blob = await response.blob();
+    const imageURL = URL.createObjectURL(blob);
+
+    result.src = imageURL;
+    result.style.display = "block";
+    downloadBtn.disabled = false;
+
+  } catch (error) {
+    alert("Failed to remove background. Check API key or quota.");
+  } finally {
+    loader.style.display = "none";
+    removeBtn.disabled = false;
+  }
+};
+
+// =============================
+// DOWNLOAD
+// =============================
+downloadBtn.onclick = () => {
+  const a = document.createElement("a");
+  a.href = result.src;
+  a.download = "background-removed.png";
+  a.click();
+};
+</script>
+</body>
+</html>
