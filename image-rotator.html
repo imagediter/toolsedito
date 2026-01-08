@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Rotator</title>
+    <style>
+        :root {
+            --primary: #4A6FA5;
+            --primary-light: #6B8CBC;
+            --secondary: #FF7E5F;
+            --success: #28a745;
+            --danger: #dc3545;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --border: #dee2e6;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--dark);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .editor-panel {
+            flex: 2;
+            min-width: 300px;
+        }
+
+        .controls-panel {
+            flex: 1;
+            min-width: 280px;
+            background: var(--light);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .upload-area {
+            border: 3px dashed var(--primary);
+            border-radius: 12px;
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+            background: rgba(74, 111, 165, 0.05);
+        }
+
+        .upload-area:hover {
+            background: rgba(74, 111, 165, 0.1);
+            border-color: var(--primary-light);
+        }
+
+        .upload-area.dragover {
+            background: rgba(74, 111, 165, 0.15);
+            transform: scale(1.02);
+        }
+
+        #imageInput {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .upload-text {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .file-name {
+            color: var(--primary);
+            font-weight: 600;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .preview-container {
+            width: 100%;
+            height: 400px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            background: #f8f9fa;
+            position: relative;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #previewCanvas {
+            max-width: 100%;
+            max-height: 100%;
+            transition: transform 0.3s;
+        }
+
+        .no-image {
+            text-align: center;
+            color: #6c757d;
+            padding: 20px;
+        }
+
+        .no-image i {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            display: block;
+            color: #adb5bd;
+        }
+
+        .zoom-controls {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            background: white;
+            border-radius: 8px;
+            padding: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 5px;
+            z-index: 10;
+        }
+
+        .zoom-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: var(--primary);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .zoom-btn:hover {
+            background: var(--primary-light);
+            transform: scale(1.1);
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 20px 0 15px 0;
+            color: var(--dark);
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title i {
+            color: var(--primary);
+        }
+
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tool-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: white;
+            color: var(--dark);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .tool-btn:hover:not(:disabled) {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .tool-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .tool-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .slider-container {
+            margin: 15px 0;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .slider-value {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .slider:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .filter-btn {
+            padding: 10px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+        }
+
+        .filter-btn:hover:not(:disabled) {
+            background: var(--light);
+            border-color: var(--primary);
+        }
+
+        .filter-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .action-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .download-btn {
+            background: var(--success);
+        }
+
+        .download-btn:hover:not(:disabled) {
+            background: #218838;
+        }
+
+        .reset-btn {
+            background: var(--danger);
+        }
+
+        .reset-btn:hover:not(:disabled) {
+            background: #c82333;
+        }
+
+        .status-bar {
+            padding: 15px 25px;
+            background: var(--light);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+
+        .dimensions {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .history-info {
+            display: flex;
+            gap: 15px;
+        }
+
+        .tab-navigation {
+            display: flex;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-weight: 600;
+            color: var(--dark);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            color: var(--primary);
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .preview-container {
+                height: 300px;
+            }
+            
+            .tool-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .filter-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .tool-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .filter-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-image"></i> Image Rotator</h1>
+            <p class="subtitle">Edit your images easily - Rotate, Flip, Adjust & Download</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="editor-panel">
+                <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                    <p class="upload-text">Click to upload or drag & drop image</p>
+                    <p class="file-name" id="fileName">JPEG, PNG, GIF up to 5MB</p>
+                    <input type="file" id="imageInput" accept="image/*">
+                </div>
+                
+                <div class="preview-container">
+                    <canvas id="previewCanvas"></canvas>
+                    
+                    <div class="no-image" id="noImageMessage">
+                        <i class="fas fa-image"></i>
+                        <h3>Upload an Image</h3>
+                        <p>Your image will appear here</p>
+                    </div>
+                    
+                    <div class="zoom-controls">
+                        <button class="zoom-btn" id="zoomOutBtn" title="Zoom Out">
+                            <i class="fas fa-search-minus"></i>
+                        </button>
+                        <button class="zoom-btn" id="zoomInBtn" title="Zoom In">
+                            <i class="fas fa-search-plus"></i>
+                        </button>
+                        <button class="zoom-btn" id="resetZoomBtn" title="Reset Zoom">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls-panel">
+                <div class="tab-navigation">
+                    <button class="tab-btn active" data-tab="transform">
+                        <i class="fas fa-sync-alt"></i> Transform
+                    </button>
+                    <button class="tab-btn" data-tab="adjust">
+                        <i class="fas fa-sliders-h"></i> Adjust
+                    </button>
+                    <button class="tab-btn" data-tab="filters">
+                        <i class="fas fa-palette"></i> Filters
+                    </button>
+                </div>
+                
+                <!-- Transform Tab -->
+                <div id="transformTab" class="tab-content active">
+                    <div class="section-title">
+                        <i class="fas fa-arrows-alt"></i> Transform Tools
+                    </div>
+                    
+                    <div class="tool-grid">
+                        <button class="tool-btn" id="rotateLeftBtn" title="Rotate 90° Left">
+                            <i class="fas fa-undo"></i> Rotate Left
+                        </button>
+                        <button class="tool-btn" id="rotateRightBtn" title="Rotate 90° Right">
+                            <i class="fas fa-redo"></i> Rotate Right
+                        </button>
+                        <button class="tool-btn" id="flipHorizontalBtn" title="Flip Horizontal">
+                            <i class="fas fa-arrows-alt-h"></i> Flip H
+                        </button>
+                        <button class="tool-btn" id="flipVerticalBtn" title="Flip Vertical">
+                            <i class="fas fa-arrows-alt-v"></i> Flip V
+                        </button>
+                    </div>
+                    
+                    <div class="section-title">
+                        <i class="fas fa-history"></i> History
+                    </div>
+                    
+                    <div class="tool-grid">
+                        <button class="tool-btn" id="undoBtn" disabled>
+                            <i class="fas fa-undo"></i> Undo
+                        </button>
+                        <button class="tool-btn" id="redoBtn" disabled>
+                            <i class="fas fa-redo"></i> Redo
+                        </button>
+                        <button class="tool-btn" id="resetAllBtn" disabled>
+                            <i class="fas fa-times-circle"></i> Reset All
+                        </button>
+                        <button class="tool-btn" id="cropBtn" disabled>
+                            <i class="fas fa-crop"></i> Crop
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Adjust Tab -->
+                <div id="adjustTab" class="tab-content">
+                    <div class="section-title">
+                        <i class="fas fa-adjust"></i> Adjustments
+                    </div>
+                    
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Brightness</span>
+                            <span class="slider-value" id="brightnessValue">100%</span>
+                        </div>
+                        <input type="range" min="0" max="200" value="100" class="slider" id="brightnessSlider">
+                    </div>
+                    
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Contrast</span>
+                            <span class="slider-value" id="contrastValue">100%</span>
+                        </div>
+                        <input type="range" min="0" max="200" value="100" class="slider" id="contrastSlider">
+                    </div>
+                    
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Saturation</span>
+                            <span class="slider-value" id="saturationValue">100%</span>
+                        </div>
+                        <input type="range" min="0" max="200" value="100" class="slider" id="saturationSlider">
+                    </div>
+                    
+                    <div class="section-title" style="margin-top: 25px;">
+                        <i class="fas fa-droplet"></i> Color Effects
+                    </div>
+                    
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Blur</span>
+                            <span class="slider-value" id="blurValue">0px</span>
+                        </div>
+                        <input type="range" min="0" max="20" value="0" class="slider" id="blurSlider">
+                    </div>
+                </div>
+                
+                <!-- Filters Tab -->
+                <div id="filtersTab" class="tab-content">
+                    <div class="section-title">
+                        <i class="fas fa-filter"></i> Quick Filters
+                    </div>
+                    
+                    <div class="filter-grid">
+                        <button class="filter-btn active" data-filter="none">None</button>
+                        <button class="filter-btn" data-filter="grayscale">Grayscale</button>
+                        <button class="filter-btn" data-filter="sepia">Sepia</button>
+                        <button class="filter-btn" data-filter="invert">Invert</button>
+                        <button class="filter-btn" data-filter="vintage">Vintage</button>
+                        <button class="filter-btn" data-filter="cool">Cool</button>
+                        <button class="filter-btn" data-filter="warm">Warm</button>
+                        <button class="filter-btn" data-filter="bright">Bright</button>
+                        <button class="filter-btn" data-filter="dark">Dark</button>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="action-btn download-btn" id="downloadBtn" disabled>
+                        <i class="fas fa-download"></i> Download
+                    </button>
+                    <button class="action-btn reset-btn" id="resetBtn" disabled>
+                        <i class="fas fa-redo"></i> Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="status-bar">
+            <div class="dimensions" id="dimensionsInfo">No image loaded</div>
+            <div class="history-info">
+                <span>Zoom: <span id="zoomPercent">100%</span></span>
+                <span>History: <span id="historyIndex">0</span>/<span id="historySize">0</span></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const imageInput = document.getElementById('imageInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const fileName = document.getElementById('fileName');
+        const previewCanvas = document.getElementById('previewCanvas');
+        const ctx = previewCanvas.getContext('2d');
+        const noImageMessage = document.getElementById('noImageMessage');
+        
+        // Tab elements
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        // Tool buttons
+        const rotateLeftBtn = document.getElementById('rotateLeftBtn');
+        const rotateRightBtn = document.getElementById('rotateRightBtn');
+        const flipHorizontalBtn = document.getElementById('flipHorizontalBtn');
+        const flipVerticalBtn = document.getElementById('flipVerticalBtn');
+        const cropBtn = document.getElementById('cropBtn');
+        
+        // Action buttons
+        const downloadBtn = document.getElementById('downloadBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const resetAllBtn = document.getElementById('resetAllBtn');
+        
+        // History buttons
+        const undoBtn = document.getElementById('undoBtn');
+        const redoBtn = document.getElementById('redoBtn');
+        
+        // Zoom controls
+        const zoomOutBtn = document.getElementById('zoomOutBtn');
+        const zoomInBtn = document.getElementById('zoomInBtn');
+        const resetZoomBtn = document.getElementById('resetZoomBtn');
+        const zoomPercent = document.getElementById('zoomPercent');
+        
+        // Sliders
+        const brightnessSlider = document.getElementById('brightnessSlider');
+        const contrastSlider = document.getElementById('contrastSlider');
+        const saturationSlider = document.getElementById('saturationSlider');
+        const blurSlider = document.getElementById('blurSlider');
+        
+        // Slider value displays
+        const brightnessValue = document.getElementById('brightnessValue');
+        const contrastValue = document.getElementById('contrastValue');
+        const saturationValue = document.getElementById('saturationValue');
+        const blurValue = document.getElementById('blurValue');
+        
+        // Filter buttons
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        
+        // Status elements
+        const dimensionsInfo = document.getElementById('dimensionsInfo');
+        const historyIndex = document.getElementById('historyIndex');
+        const historySize = document.getElementById('historySize');
+        
+        // State variables
+        let originalImage = null;
+        let currentImage = null;
+        let imageHistory = [];
+        let currentHistoryIndex = -1;
+        let isImageLoaded = false;
+        
+        // Transformation state
+        let rotation = 0;
+        let scaleX = 1;
+        let scaleY = 1;
+        let zoom = 1;
+        
+        // Adjustment state
+        let brightness = 100;
+        let contrast = 100;
+        let saturation = 100;
+        let blur = 0;
+        let currentFilter = 'none';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', init);
+
+        function init() {
+            console.log('Initializing image editor...');
+            setupEventListeners();
+            updateUI();
+        }
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            console.log('Setting up event listeners...');
+            
+            // Upload area events
+            uploadArea.addEventListener('click', () => {
+                console.log('Upload area clicked');
+                imageInput.click();
+            });
+            
+            uploadArea.addEventListener('dragover', handleDragOver);
+            uploadArea.addEventListener('dragleave', handleDragLeave);
+            uploadArea.addEventListener('drop', handleDrop);
+            
+            // Image input event - FIXED: Changed from 'change' to 'input'
+            imageInput.addEventListener('input', handleImageInput);
+            imageInput.addEventListener('change', handleImageInput);
+            
+            // Tab navigation
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tabId = btn.dataset.tab;
+                    
+                    // Update active tab button
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    // Show active tab content
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                        if (content.id === tabId + 'Tab') {
+                            content.classList.add('active');
+                        }
+                    });
+                });
+            });
+            
+            // Transform buttons
+            rotateLeftBtn.addEventListener('click', () => rotateImage(-90));
+            rotateRightBtn.addEventListener('click', () => rotateImage(90));
+            flipHorizontalBtn.addEventListener('click', () => flipImage('horizontal'));
+            flipVerticalBtn.addEventListener('click', () => flipImage('vertical'));
+            cropBtn.addEventListener('click', toggleCrop);
+            
+            // Action buttons
+            downloadBtn.addEventListener('click', downloadImage);
+            resetBtn.addEventListener('click', resetAdjustments);
+            resetAllBtn.addEventListener('click', resetEverything);
+            
+            // History buttons
+            undoBtn.addEventListener('click', undo);
+            redoBtn.addEventListener('click', redo);
+            
+            // Zoom controls
+            zoomOutBtn.addEventListener('click', () => adjustZoom(0.9));
+            zoomInBtn.addEventListener('click', () => adjustZoom(1.1));
+            resetZoomBtn.addEventListener('click', resetZoom);
+            
+            // Slider events
+            brightnessSlider.addEventListener('input', updateBrightness);
+            contrastSlider.addEventListener('input', updateContrast);
+            saturationSlider.addEventListener('input', updateSaturation);
+            blurSlider.addEventListener('input', updateBlur);
+            
+            // Filter buttons
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => applyFilter(btn.dataset.filter));
+            });
+            
+            console.log('Event listeners setup complete');
+        }
+        
+        // Handle drag over
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            uploadArea.classList.add('dragover');
+            console.log('Drag over upload area');
+        }
+        
+        // Handle drag leave
+        function handleDragLeave(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            uploadArea.classList.remove('dragover');
+            console.log('Drag leave upload area');
+        }
+        
+        // Handle drop
+        function handleDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            uploadArea.classList.remove('dragover');
+            console.log('File dropped');
+            
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                console.log('Files dropped:', e.dataTransfer.files);
+                const file = e.dataTransfer.files[0];
+                processImageFile(file);
+            }
+        }
+        
+        // Handle image input - FIXED VERSION
+        function handleImageInput(e) {
+            console.log('Image input event triggered', e.type);
+            
+            // Get the file from the input
+            const file = imageInput.files[0];
+            if (!file) {
+                console.log('No file selected');
+                return;
+            }
+            
+            console.log('File selected:', file.name, file.type, file.size);
+            processImageFile(file);
+        }
+        
+        // Process image file - NEW FUNCTION
+        function processImageFile(file) {
+            console.log('Processing image file:', file.name);
+            
+            // Validate file type
+            if (!file.type.match('image.*')) {
+                alert('Please select a valid image file (JPEG, PNG, GIF, etc.)');
+                console.log('Invalid file type:', file.type);
+                return;
+            }
+            
+            console.log('File is valid, creating FileReader...');
+            
+            const reader = new FileReader();
+            
+            reader.onloadstart = function() {
+                console.log('FileReader started loading...');
+                fileName.textContent = 'Loading image...';
+            };
+            
+            reader.onload = function(e) {
+                console.log('FileReader loaded successfully');
+                
+                const img = new Image();
+                
+                img.onload = function() {
+                    console.log('Image loaded successfully, dimensions:', img.width, 'x', img.height);
+                    
+                    originalImage = img;
+                    currentImage = img;
+                    
+                    // Reset all transformations
+                    resetEverything();
+                    
+                    // Initialize history
+                    imageHistory = [getImageData()];
+                    currentHistoryIndex = 0;
+                    
+                    // Update UI
+                    isImageLoaded = true;
+                    fileName.textContent = `${file.name} (${formatFileSize(file.size)})`;
+                    noImageMessage.style.display = 'none';
+                    
+                    // Update dimensions
+                    dimensionsInfo.textContent = `${img.width} × ${img.height} pixels`;
+                    
+                    // Draw image
+                    drawImage();
+                    updateUI();
+                    
+                    // Save initial state to history
+                    saveToHistory();
+                    
+                    console.log('Image processing complete');
+                };
+                
+                img.onerror = function() {
+                    console.error('Failed to load image');
+                    alert('Failed to load the image. Please try another file.');
+                    fileName.textContent = 'Failed to load image';
+                };
+                
+                console.log('Setting image source...');
+                img.src = e.target.result;
+            };
+            
+            reader.onerror = function() {
+                console.error('FileReader error');
+                alert('Error reading the file. Please try again.');
+                fileName.textContent = 'Error reading file';
+            };
+            
+            reader.onabort = function() {
+                console.log('FileReader aborted');
+                fileName.textContent = 'File upload cancelled';
+            };
+            
+            console.log('Starting FileReader readAsDataURL...');
+            reader.readAsDataURL(file);
+        }
+        
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' bytes';
+            else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+            else return (bytes / 1048576).toFixed(1) + ' MB';
+        }
+        
+        // Rotate image
+        function rotateImage(degrees) {
+            rotation = (rotation + degrees) % 360;
+            drawImage();
+            saveToHistory();
+        }
+        
+        // Flip image
+        function flipImage(direction) {
+            if (direction === 'horizontal') {
+                scaleX *= -1;
+            } else {
+                scaleY *= -1;
+            }
+            drawImage();
+            saveToHistory();
+        }
+        
+        // Toggle crop (simplified - just applies a centered crop)
+        function toggleCrop() {
+            if (!currentImage) return;
+            
+            // Simple centered crop (crops 20% from each side)
+            const cropWidth = currentImage.width * 0.6;
+            const cropHeight = currentImage.height * 0.6;
+            const cropX = (currentImage.width - cropWidth) / 2;
+            const cropY = (currentImage.height - cropHeight) / 2;
+            
+            // Create temporary canvas for cropping
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            tempCanvas.width = cropWidth;
+            tempCanvas.height = cropHeight;
+            
+            // Draw cropped portion
+            tempCtx.drawImage(
+                currentImage,
+                cropX, cropY, cropWidth, cropHeight,
+                0, 0, cropWidth, cropHeight
+            );
+            
+            // Create new image from cropped canvas
+            const croppedImage = new Image();
+            croppedImage.onload = function() {
+                currentImage = croppedImage;
+                drawImage();
+                saveToHistory();
+                updateDimensions();
+            };
+            croppedImage.src = tempCanvas.toDataURL();
+        }
+        
+        // Adjust zoom
+        function adjustZoom(factor) {
+            zoom *= factor;
+            zoom = Math.max(0.1, Math.min(5, zoom)); // Limit zoom range
+            drawImage();
+            updateZoomDisplay();
+        }
+        
+        // Reset zoom
+        function resetZoom() {
+            zoom = 1;
+            drawImage();
+            updateZoomDisplay();
+        }
+        
+        // Update zoom display
+        function updateZoomDisplay() {
+            const percent = Math.round(zoom * 100);
+            zoomPercent.textContent = `${percent}%`;
+        }
+        
+        // Update brightness
+        function updateBrightness() {
+            brightness = parseInt(brightnessSlider.value);
+            brightnessValue.textContent = `${brightness}%`;
+            drawImage();
+        }
+        
+        // Update contrast
+        function updateContrast() {
+            contrast = parseInt(contrastSlider.value);
+            contrastValue.textContent = `${contrast}%`;
+            drawImage();
+        }
+        
+        // Update saturation
+        function updateSaturation() {
+            saturation = parseInt(saturationSlider.value);
+            saturationValue.textContent = `${saturation}%`;
+            drawImage();
+        }
+        
+        // Update blur
+        function updateBlur() {
+            blur = parseInt(blurSlider.value);
+            blurValue.textContent = `${blur}px`;
+            drawImage();
+        }
+        
+        // Apply filter
+        function applyFilter(filterName) {
+            currentFilter = filterName;
+            
+            // Update active filter button
+            filterBtns.forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.filter-btn[data-filter="${filterName}"]`).classList.add('active');
+            
+            drawImage();
+            saveToHistory();
+        }
+        
+        // Draw image with all transformations
+        function drawImage() {
+            if (!currentImage) {
+                console.log('No image to draw');
+                return;
+            }
+            
+            console.log('Drawing image with transformations');
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+            
+            // Set canvas dimensions based on zoom
+            const displayWidth = currentImage.width * zoom;
+            const displayHeight = currentImage.height * zoom;
+            
+            previewCanvas.width = displayWidth;
+            previewCanvas.height = displayHeight;
+            
+            // Save context state
+            ctx.save();
+            
+            // Apply transformations
+            ctx.translate(displayWidth / 2, displayHeight / 2);
+            ctx.rotate(rotation * Math.PI / 180);
+            ctx.scale(scaleX, scaleY);
+            
+            // Build filter string
+            let filterString = '';
+            
+            // Apply adjustments
+            if (brightness !== 100 || contrast !== 100 || saturation !== 100 || blur > 0) {
+                filterString += `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)`;
+                if (blur > 0) filterString += ` blur(${blur}px)`;
+            }
+            
+            // Apply selected filter
+            switch (currentFilter) {
+                case 'grayscale':
+                    filterString += ' grayscale(100%)';
+                    break;
+                case 'sepia':
+                    filterString += ' sepia(100%)';
+                    break;
+                case 'invert':
+                    filterString += ' invert(100%)';
+                    break;
+                case 'vintage':
+                    filterString += ' sepia(70%) brightness(90%) contrast(110%)';
+                    break;
+                case 'cool':
+                    filterString += ' brightness(110%) saturate(130%) hue-rotate(-20deg)';
+                    break;
+                case 'warm':
+                    filterString += ' brightness(110%) saturate(130%) hue-rotate(20deg)';
+                    break;
+                case 'bright':
+                    filterString += ' brightness(130%) saturate(120%)';
+                    break;
+                case 'dark':
+                    filterString += ' brightness(70%) contrast(120%)';
+                    break;
+            }
+            
+            if (filterString) {
+                ctx.filter = filterString.trim();
+                console.log('Applying filter:', filterString);
+            }
+            
+            // Draw image
+            ctx.drawImage(
+                currentImage,
+                -currentImage.width / 2,
+                -currentImage.height / 2,
+                currentImage.width,
+                currentImage.height
+            );
+            
+            // Restore context
+            ctx.restore();
+            
+            console.log('Image drawn successfully');
+        }
+        
+        // Get current image data for history
+        function getImageData() {
+            if (!currentImage) return '';
+            
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            tempCanvas.width = currentImage.width;
+            tempCanvas.height = currentImage.height;
+            
+            // Apply all filters and transformations
+            tempCtx.save();
+            tempCtx.translate(currentImage.width / 2, currentImage.height / 2);
+            tempCtx.rotate(rotation * Math.PI / 180);
+            tempCtx.scale(scaleX, scaleY);
+            
+            // Build filter string
+            let filterString = '';
+            if (brightness !== 100 || contrast !== 100 || saturation !== 100 || blur > 0) {
+                filterString += `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)`;
+                if (blur > 0) filterString += ` blur(${blur}px)`;
+            }
+            
+            // Apply selected filter
+            switch (currentFilter) {
+                case 'grayscale': filterString += ' grayscale(100%)'; break;
+                case 'sepia': filterString += ' sepia(100%)'; break;
+                case 'invert': filterString += ' invert(100%)'; break;
+                case 'vintage': filterString += ' sepia(70%) brightness(90%) contrast(110%)'; break;
+                case 'cool': filterString += ' brightness(110%) saturate(130%) hue-rotate(-20deg)'; break;
+                case 'warm': filterString += ' brightness(110%) saturate(130%) hue-rotate(20deg)'; break;
+                case 'bright': filterString += ' brightness(130%) saturate(120%)'; break;
+                case 'dark': filterString += ' brightness(70%) contrast(120%)'; break;
+            }
+            
+            if (filterString) {
+                tempCtx.filter = filterString.trim();
+            }
+            
+            tempCtx.drawImage(
+                currentImage,
+                -currentImage.width / 2,
+                -currentImage.height / 2,
+                currentImage.width,
+                currentImage.height
+            );
+            
+            tempCtx.restore();
+            
+            return tempCanvas.toDataURL();
+        }
+        
+        // Save current state to history
+        function saveToHistory() {
+            if (!currentImage) return;
+            
+            // Remove any future history if we're not at the end
+            if (currentHistoryIndex < imageHistory.length - 1) {
+                imageHistory = imageHistory.slice(0, currentHistoryIndex + 1);
+            }
+            
+            // Add current state to history
+            imageHistory.push(getImageData());
+            currentHistoryIndex++;
+            
+            // Limit history size
+            if (imageHistory.length > 10) {
+                imageHistory.shift();
+                currentHistoryIndex--;
+            }
+            
+            updateHistoryUI();
+            updateUI();
+        }
+        
+        // Undo
+        function undo() {
+            if (currentHistoryIndex > 0) {
+                currentHistoryIndex--;
+                loadHistoryState();
+                updateHistoryUI();
+                updateUI();
+            }
+        }
+        
+        // Redo
+        function redo() {
+            if (currentHistoryIndex < imageHistory.length - 1) {
+                currentHistoryIndex++;
+                loadHistoryState();
+                updateHistoryUI();
+                updateUI();
+            }
+        }
+        
+        // Load history state
+        function loadHistoryState() {
+            if (imageHistory.length === 0 || currentHistoryIndex < 0) return;
+            
+            const img = new Image();
+            img.onload = function() {
+                currentImage = img;
+                drawImage();
+                updateDimensions();
+            };
+            img.src = imageHistory[currentHistoryIndex];
+        }
+        
+        // Update history UI
+        function updateHistoryUI() {
+            historyIndex.textContent = currentHistoryIndex;
+            historySize.textContent = imageHistory.length - 1;
+            
+            undoBtn.disabled = currentHistoryIndex <= 0;
+            redoBtn.disabled = currentHistoryIndex >= imageHistory.length - 1;
+        }
+        
+        // Reset adjustments only (not transformations)
+        function resetAdjustments() {
+            brightness = 100;
+            contrast = 100;
+            saturation = 100;
+            blur = 0;
+            currentFilter = 'none';
+            
+            // Reset sliders
+            brightnessSlider.value = brightness;
+            contrastSlider.value = contrast;
+            saturationSlider.value = saturation;
+            blurSlider.value = blur;
+            
+            // Reset filter buttons
+            filterBtns.forEach(btn => btn.classList.remove('active'));
+            document.querySelector('.filter-btn[data-filter="none"]').classList.add('active');
+            
+            // Update slider displays
+            updateSliderDisplays();
+            
+            drawImage();
+            saveToHistory();
+        }
+        
+        // Reset everything to original
+        function resetEverything() {
+            if (!originalImage) return;
+            
+            currentImage = originalImage;
+            
+            // Reset all transformations
+            rotation = 0;
+            scaleX = 1;
+            scaleY = 1;
+            zoom = 1;
+            
+            // Reset adjustments
+            brightness = 100;
+            contrast = 100;
+            saturation = 100;
+            blur = 0;
+            currentFilter = 'none';
+            
+            // Reset sliders
+            brightnessSlider.value = brightness;
+            contrastSlider.value = contrast;
+            saturationSlider.value = saturation;
+            blurSlider.value = blur;
+            
+            // Reset filter buttons
+            filterBtns.forEach(btn => btn.classList.remove('active'));
+            document.querySelector('.filter-btn[data-filter="none"]').classList.add('active');
+            
+            // Update slider displays
+            updateSliderDisplays();
+            updateZoomDisplay();
+            
+            drawImage();
+            saveToHistory();
+            updateDimensions();
+        }
+        
+        // Update slider displays
+        function updateSliderDisplays() {
+            brightnessValue.textContent = `${brightness}%`;
+            contrastValue.textContent = `${contrast}%`;
+            saturationValue.textContent = `${saturation}%`;
+            blurValue.textContent = `${blur}px`;
+        }
+        
+        // Update dimensions display
+        function updateDimensions() {
+            if (currentImage) {
+                dimensionsInfo.textContent = `${currentImage.width} × ${currentImage.height} pixels`;
+            }
+        }
+        
+        // Download image
+        function downloadImage() {
+            if (!currentImage) return;
+            
+            // Create a temporary canvas for download (full quality)
+            const downloadCanvas = document.createElement('canvas');
+            const downloadCtx = downloadCanvas.getContext('2d');
+            
+            downloadCanvas.width = currentImage.width;
+            downloadCanvas.height = currentImage.height;
+            
+            // Apply all transformations and filters
+            downloadCtx.save();
+            downloadCtx.translate(currentImage.width / 2, currentImage.height / 2);
+            downloadCtx.rotate(rotation * Math.PI / 180);
+            downloadCtx.scale(scaleX, scaleY);
+            
+            // Build filter string
+            let filterString = '';
+            if (brightness !== 100 || contrast !== 100 || saturation !== 100 || blur > 0) {
+                filterString += `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)`;
+                if (blur > 0) filterString += ` blur(${blur}px)`;
+            }
+            
+            // Apply selected filter
+            switch (currentFilter) {
+                case 'grayscale': filterString += ' grayscale(100%)'; break;
+                case 'sepia': filterString += ' sepia(100%)'; break;
+                case 'invert': filterString += ' invert(100%)'; break;
+                case 'vintage': filterString += ' sepia(70%) brightness(90%) contrast(110%)'; break;
+                case 'cool': filterString += ' brightness(110%) saturate(130%) hue-rotate(-20deg)'; break;
+                case 'warm': filterString += ' brightness(110%) saturate(130%) hue-rotate(20deg)'; break;
+                case 'bright': filterString += ' brightness(130%) saturate(120%)'; break;
+                case 'dark': filterString += ' brightness(70%) contrast(120%)'; break;
+            }
+            
+            if (filterString) {
+                downloadCtx.filter = filterString.trim();
+            }
+            
+            downloadCtx.drawImage(
+                currentImage,
+                -currentImage.width / 2,
+                -currentImage.height / 2,
+                currentImage.width,
+                currentImage.height
+            );
+            
+            downloadCtx.restore();
+            
+            // Trigger download
+            const link = document.createElement('a');
+            link.download = `edited-image-${Date.now()}.png`;
+            link.href = downloadCanvas.toDataURL('image/png');
+            link.click();
+            
+            // Visual feedback
+            const originalText = downloadBtn.innerHTML;
+            downloadBtn.innerHTML = '<i class="fas fa-check"></i> Done!';
+            downloadBtn.style.background = '#218838';
+            
+            setTimeout(() => {
+                downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download';
+                downloadBtn.style.background = '';
+            }, 1500);
+        }
+        
+        // Update UI state
+        function updateUI() {
+            const hasImage = isImageLoaded && currentImage !== null;
+            
+            console.log('Updating UI, hasImage:', hasImage);
+            
+            // Enable/disable buttons
+            rotateLeftBtn.disabled = !hasImage;
+            rotateRightBtn.disabled = !hasImage;
+            flipHorizontalBtn.disabled = !hasImage;
+            flipVerticalBtn.disabled = !hasImage;
+            cropBtn.disabled = !hasImage;
+            resetBtn.disabled = !hasImage;
+            resetAllBtn.disabled = !hasImage;
+            downloadBtn.disabled = !hasImage;
+            
+            // Enable/disable sliders
+            brightnessSlider.disabled = !hasImage;
+            contrastSlider.disabled = !hasImage;
+            saturationSlider.disabled = !hasImage;
+            blurSlider.disabled = !hasImage;
+            
+            // Enable/disable filter buttons (except "None")
+            filterBtns.forEach(btn => {
+                if (btn.dataset.filter !== 'none') {
+                    btn.disabled = !hasImage;
+                }
+            });
+            
+            // Enable/disable zoom buttons
+            zoomOutBtn.disabled = !hasImage;
+            zoomInBtn.disabled = !hasImage;
+            resetZoomBtn.disabled = !hasImage;
+        }
+    </script>
+</body>
+</html>
